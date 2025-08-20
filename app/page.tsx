@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table"
 import { ArrowDownUp, Bell, Download, Link2, MessageSquare, Play, Sparkles } from "lucide-react"
+import { useTheme } from "next-themes"
 import { useEffect, useMemo, useState } from "react"
 import type { ApiSort, Item, SortKey, TimeWindow } from "../app/types/types"
 import { downloadCSV, downloadJSON, valueFor } from "../app/utils/utils"
@@ -32,7 +33,13 @@ export default function Page() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc")
   const [notifyEnabled, setNotifyEnabled] = useState<boolean>(false)
   const [, setNotifyPermission] = useState<NotificationPermission>("default")
-  const [themeDark, setThemeDark] = useState<boolean>(() => typeof window !== "undefined" && localStorage.getItem("theme") === "dark")
+
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -55,17 +62,6 @@ export default function Page() {
     const count = items.length
     new Notification("Scraping complete", { body: `${count} posts found` })
   }, [lastCompletedJobId, jobId, notifyEnabled, items.length])
-
-  useEffect(() => {
-    const root = document.documentElement
-    if (themeDark) {
-      root.classList.add("dark")
-      localStorage.setItem("theme", "dark")
-    } else {
-      root.classList.remove("dark")
-      localStorage.setItem("theme", "light")
-    }
-  }, [themeDark])
 
   const rows = useMemo(() => {
     const dir = sortDir === "asc" ? 1 : -1
@@ -148,7 +144,7 @@ export default function Page() {
     return (
       <>
         <TR
-          className={"text-sm"}
+          className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800"
           onClick={() => setExpanded(s => ({ ...s, [it.id]: !s[it.id] }))}
         >
           <TD><Badge>{it.subreddit}</Badge></TD>
@@ -173,22 +169,26 @@ export default function Page() {
             </a>
           </TD>
         </TR>
-        <TR className={isOpen ? ("text-sm bg-gray-50") : "hidden"}>
-          <TD colSpan={6}>
-            <div className="font-semibold mb-2">Top comments</div>
-            <div className="grid gap-2">
-              {it.comment_insights.length ? it.comment_insights.map(c => (
-                <div key={c.id} className="rounded-lg border border-gray-200 bg-white p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-gray-700">@{c.author}</span>
-                    <span className="text-gray-500">↑ {c.score}</span>
-                  </div>
-                  <p className="text-gray-800 whitespace-pre-wrap">{c.body}</p>
+        {isOpen && (
+          <TR>
+            <TD colSpan={6} className="p-0">
+              <div className="p-4 bg-gray-50 dark:bg-neutral-900">
+                <div className="font-semibold mb-2">Top comments</div>
+                <div className="grid gap-2">
+                  {it.comment_insights.length ? it.comment_insights.map(c => (
+                    <div key={c.id} className="rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-gray-700 dark:text-gray-300">@{c.author}</span>
+                        <span className="text-gray-500">↑ {c.score}</span>
+                      </div>
+                      <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{c.body}</p>
+                    </div>
+                  )) : <div className="text-gray-600 dark:text-gray-400">No comments fetched</div>}
                 </div>
-              )) : <div className="text-gray-600">No comments fetched</div>}
-            </div>
-          </TD>
-        </TR>
+              </div>
+            </TD>
+          </TR>
+        )}
       </>
     )
   }
@@ -205,10 +205,6 @@ export default function Page() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-600">{themeDark ? "Dark" : "Light"}</span>
-              <Switch checked={themeDark} onCheckedChange={setThemeDark} />
-            </div>
             <Button
               onClick={async () => {
                 const next = !notifyEnabled
@@ -338,6 +334,19 @@ export default function Page() {
           </CardContent>
         </Card>
       </main>
+      {mounted && (
+        <div className="fixed bottom-6 right-6 animate-fade-in">
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 shadow-lg rounded-full px-4 py-2">
+            <Switch
+              checked={theme === "dark"}
+              onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+            />
+            <span className="text-xs text-gray-600 dark:text-gray-300">
+              {theme === "dark" ? "Dark" : "Light"}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
