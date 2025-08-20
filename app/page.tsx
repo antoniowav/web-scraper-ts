@@ -34,7 +34,7 @@ export default function Page() {
   const [notifyEnabled, setNotifyEnabled] = useState<boolean>(false)
   const [, setNotifyPermission] = useState<NotificationPermission>("default")
   const [, setMounted] = useState(false)
-  const [notifySinceJobId, ] = useState<number | null>(null)
+
 
   useEffect(() => {
     setMounted(true)
@@ -54,17 +54,22 @@ export default function Page() {
     if (!lastCompletedJobId) return
     if (lastCompletedJobId !== jobId) return
     if (!notifyEnabled) return
-    if (notifySinceJobId === null) return
-    if (lastCompletedJobId < notifySinceJobId) return
 
-    const audio = new Audio("/sounds/confirmation-sound.wav")
-    audio.play().catch(() => {})
+    const playSoundAndNotify = async () => {
+      try {
+        const audio = new Audio("/sounds/confirmation-sound.wav")
+        await audio.play()
+      } catch {}
 
-    if ("Notification" in window && Notification.permission === "granted") {
-      const count = items.length
-      new Notification("Scraping complete", { body: `${count} posts found` })
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("Scraping complete", {
+          body: `${items.length} posts found`,
+        })
+      }
     }
-  }, [lastCompletedJobId, jobId, notifyEnabled, notifySinceJobId, items.length])
+
+    playSoundAndNotify()
+  }, [lastCompletedJobId, jobId, notifyEnabled, items.length])
 
   const rows = useMemo(() => {
     const dir = sortDir === "asc" ? 1 : -1

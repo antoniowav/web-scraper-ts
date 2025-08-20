@@ -29,7 +29,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {children}
       {/* Global floating controls, fade in after mount */}
       <FloatingControls
-        mounted={mounted}
         notifyEnabled={notifyEnabled}
         setNotifyEnabled={setNotifyEnabled}
       />

@@ -4,15 +4,29 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Bell } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 
 type Props = {
-  mounted: boolean
   notifyEnabled: boolean
   setNotifyEnabled: (v: boolean) => void
 }
 
-export function FloatingControls({ mounted, notifyEnabled, setNotifyEnabled }: Props) {
+const STORAGE_KEY = "notifications-enabled"
+
+export function FloatingControls({ notifyEnabled, setNotifyEnabled }: Props) {
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved === "true") setNotifyEnabled(true)
+    setMounted(true)
+  }, [setNotifyEnabled])
+
+  useEffect(() => {
+    if (!mounted) return
+    localStorage.setItem(STORAGE_KEY, String(notifyEnabled))
+  }, [notifyEnabled, mounted])
 
   const ensurePermission = async () => {
     if (!notifyEnabled) return
@@ -23,9 +37,12 @@ export function FloatingControls({ mounted, notifyEnabled, setNotifyEnabled }: P
   }
 
   return (
-    <div className={`fixed bottom-6 right-6 transition-opacity duration-400 ${mounted ? "opacity-100" : "opacity-0"}`}>
+    <div
+      className={`fixed bottom-6 right-6 transition-opacity duration-500 ${
+        mounted ? "opacity-100" : "opacity-0"
+      }`}
+    >
       <div className="flex items-center gap-3 bg-white dark:bg-gray-800 shadow-lg rounded-full pl-3 pr-3 py-2">
-        {/* Theme switch */}
         <div className="flex items-center gap-2">
           <Switch
             checked={mounted ? theme === "dark" : false}
@@ -40,7 +57,6 @@ export function FloatingControls({ mounted, notifyEnabled, setNotifyEnabled }: P
 
         <span className="h-5 w-px bg-gray-200 dark:bg-gray-700" />
 
-        {/* Notifications toggle */}
         <Button
           onClick={async () => {
             const next = !notifyEnabled
