@@ -1,0 +1,295 @@
+@import "tailwindcss";
+
+:root {
+    --bg: 248 248 250;
+    --card: 255 255 255;
+    --muted: 113 113 122;
+    --border: 229 231 235;
+    --ring: 17 24 39;
+    --brand: 17 24 39;
+    --sticky-offset: 64px;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    background: rgb(var(--bg));
+    color: rgb(17 24 39);
+    font-family:
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        Segoe UI,
+        Roboto,
+        Helvetica,
+        Arial,
+        "Apple Color Emoji",
+        "Segoe UI Emoji";
+}
+
+.container {
+    width: 100%;
+    max-width: 1120px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.input {
+    display: inline-flex;
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid rgb(var(--border));
+    background: white;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.925rem;
+    outline: none;
+}
+
+.input:focus {
+    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+    border-color: rgb(203 213 225);
+}
+
+.select {
+    appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, currentColor 50%),
+        linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position:
+        calc(100% - 16px) calc(50% - 3px),
+        calc(100% - 12px) calc(50% - 3px);
+    background-size:
+        6px 6px,
+        6px 6px;
+    background-repeat: no-repeat;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition:
+        transform 0.05s ease,
+        box-shadow 0.15s ease,
+        opacity 0.2s ease;
+    outline: none;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background: black;
+    color: white;
+    padding: 0.65rem 1rem;
+}
+
+.btn-ghost {
+    background: white;
+    border: 1px solid rgb(var(--border));
+    color: rgb(17 24 39);
+    padding: 0.6rem 0.9rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    background: rgba(17, 24, 39, 0.06);
+    color: rgb(17 24 39);
+}
+
+.card {
+    background: rgb(var(--card));
+    border: 1px solid rgb(var(--border));
+    border-radius: 1rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    position: sticky;
+    z-index: 20;
+    background: white;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: rgb(var(--muted));
+    padding: 0.75rem;
+    border-bottom: 1px solid rgb(var(--border));
+    box-shadow: 0 1px 0 0 rgb(var(--border));
+}
+
+.table tbody td {
+    position: relative;
+    z-index: 0;
+    padding: 0.875rem 0.75rem;
+    border-bottom: 1px solid rgb(var(--border));
+}
+
+.kbd {
+    font-family:
+        ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+    font-size: 0.72rem;
+    background: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    border-bottom-width: 2px;
+    border-radius: 0.5rem;
+    padding: 0.15rem 0.4rem;
+}
+
+.skeleton {
+    background: linear-gradient(100deg, #f3f4f6 40%, #e5e7eb 50%, #f3f4f6 60%);
+    background-size: 200% 100%;
+    animation: shine 1.2s infinite;
+    border-radius: 0.5rem;
+    height: 1rem;
+}
+@keyframes shine {
+    to {
+        background-position: -200% 0;
+    }
+}
+
+html {
+    scrollbar-gutter: stable both-edges;
+}
+
+.dark body {
+    background-color: #0b0b0d;
+    color: #eaecef;
+    color-scheme: dark;
+}
+
+/* Surfaces */
+.dark .bg-white {
+    background-color: #17181c !important;
+}
+.dark .bg-white\/80 {
+    background-color: rgba(23, 24, 28, 0.85) !important;
+}
+.dark .bg-gray-50 {
+    background-color: #1e2025 !important;
+}
+.dark .border-gray-200 {
+    border-color: #2b2d33 !important;
+}
+.dark .backdrop-blur {
+    backdrop-filter: saturate(120%) blur(8px);
+}
+
+/* Text colors */
+.dark .text-gray-500 {
+    color: #9aa0aa !important;
+}
+.dark .text-gray-600 {
+    color: #b3b7bf !important;
+}
+.dark .text-gray-700 {
+    color: #d2d6df !important;
+}
+
+/* Links */
+.dark a.text-blue-600 {
+    color: #7aa2ff !important;
+}
+.dark a.text-blue-600:hover {
+    color: #9bb8ff !important;
+}
+
+/* Cards and subtle elevation */
+.dark .card {
+    background-color: #17181c;
+    border-color: #2b2d33;
+    box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.02),
+        0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Table */
+.dark .table thead th {
+    background-color: #1b1d22 !important;
+    color: #cfd3da !important;
+    border-bottom-color: #2b2d33 !important;
+    box-shadow: inset 0 -1px 0 #2b2d33;
+}
+.dark .table tbody td {
+    border-top-color: #2b2d33 !important;
+}
+
+/* Inputs, selects, textareas */
+.dark input,
+.dark select,
+.dark textarea {
+    background-color: #121318 !important;
+    border-color: #2b2d33 !important;
+    color: #eaecef !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: #7f8692 !important;
+}
+.dark select:disabled,
+.dark input:disabled,
+.dark textarea:disabled {
+    background-color: #15161b !important;
+    color: #6d7380 !important;
+    border-color: #24262b !important;
+}
+
+/* Buttons */
+.dark .btn-ghost {
+    background-color: transparent !important;
+    color: #eaecef !important;
+    border-color: #2b2d33 !important;
+}
+.dark .btn-ghost:hover {
+    background-color: #202127 !important;
+}
+.dark .btn-primary {
+    background-color: #0f62fe !important;
+    color: #ffffff !important;
+}
+.dark .btn-primary:disabled {
+    background-color: #1b2b55 !important;
+    color: #9fb5ff !important;
+}
+
+/* Badges and small chips */
+.dark .badge,
+.dark .Badge,
+.dark [class*="badge"] {
+    background-color: #20222a !important;
+    color: #eaecef !important;
+    border-color: #2b2d33 !important;
+}
+
+/* Expanded comment cards */
+.dark .bg-white.p-3 {
+    background-color: #15161b !important;
+    border-color: #2b2d33 !important;
+}
+.dark .text-gray-800 {
+    color: #e5e7eb !important;
+}
+
+/* Headers and separators */
+.dark header.border-b {
+    border-bottom-color: #2b2d33 !important;
+}
