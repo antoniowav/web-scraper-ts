@@ -11,7 +11,7 @@ export function TBody(props: HTMLAttributes<HTMLTableSectionElement>) {
   return <tbody {...props} className={cn(props.className)} />
 }
 export function TR(props: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr {...props} className={cn("hover:bg-gray-50", props.className)} />
+  return <tr {...props} className={cn(props.className)} />
 }
 export function TH(props: ThHTMLAttributes<HTMLTableCellElement>) {
   return <th {...props} className={cn(props.className)} />

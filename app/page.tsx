@@ -1,15 +1,15 @@
 "use client"
 
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { FloatingControls } from "@/components/ui/FloatingControls/FloatingControls"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table"
-import { ArrowDownUp, Bell, Download, Link2, MessageSquare, Play, Sparkles } from "lucide-react"
-import { useTheme } from "next-themes"
+import { ArrowDownUp, Download, Link2, MessageSquare, Play, Sparkles } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import type { ApiSort, Item, SortKey, TimeWindow } from "../app/types/types"
 import { downloadCSV, downloadJSON, valueFor } from "../app/utils/utils"
@@ -33,9 +33,8 @@ export default function Page() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc")
   const [notifyEnabled, setNotifyEnabled] = useState<boolean>(false)
   const [, setNotifyPermission] = useState<NotificationPermission>("default")
-
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const [, setMounted] = useState(false)
+  const [notifySinceJobId, setNotifySinceJobId] = useState<number | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -54,14 +53,18 @@ export default function Page() {
   useEffect(() => {
     if (!lastCompletedJobId) return
     if (lastCompletedJobId !== jobId) return
+    if (!notifyEnabled) return
+    if (notifySinceJobId === null) return
+    if (lastCompletedJobId < notifySinceJobId) return
+
     const audio = new Audio("/sounds/confirmation-sound.wav")
     audio.play().catch(() => {})
-    if (!notifyEnabled) return
-    if (!("Notification" in window)) return
-    if (Notification.permission !== "granted") return
-    const count = items.length
-    new Notification("Scraping complete", { body: `${count} posts found` })
-  }, [lastCompletedJobId, jobId, notifyEnabled, items.length])
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      const count = items.length
+      new Notification("Scraping complete", { body: `${count} posts found` })
+    }
+  }, [lastCompletedJobId, jobId, notifyEnabled, notifySinceJobId, items.length])
 
   const rows = useMemo(() => {
     const dir = sortDir === "asc" ? 1 : -1
@@ -144,7 +147,7 @@ export default function Page() {
     return (
       <>
         <TR
-          className="text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800"
+          className="text-sm cursor-pointer post-row"
           onClick={() => setExpanded(s => ({ ...s, [it.id]: !s[it.id] }))}
         >
           <TD><Badge>{it.subreddit}</Badge></TD>
@@ -169,19 +172,22 @@ export default function Page() {
             </a>
           </TD>
         </TR>
+
         {isOpen && (
-          <TR>
-            <TD colSpan={6} className="p-0">
-              <div className="p-4 bg-gray-50 dark:bg-neutral-900">
+          <TR className="hover:bg-transparent dark:hover:bg-transparent">
+            <TD colSpan={6} className="p-0!">
+              <div className="p-4 bg-gray-50">
                 <div className="font-semibold mb-2">Top comments</div>
                 <div className="grid gap-2">
                   {it.comment_insights.length ? it.comment_insights.map(c => (
-                    <div key={c.id} className="rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-3">
+                    <div
+                      key={c.id}
+                      className="comment-card rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-3"
+                    >
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-gray-700 dark:text-gray-300">@{c.author}</span>
-                        <span className="text-gray-500">↑ {c.score}</span>
+                        <span className="text-gray-700">@{c.author}</span>
                       </div>
-                      <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{c.body}</p>
+                        <p className="text-gray-800 whitespace-pre-wrap">{c.body}</p>
                     </div>
                   )) : <div className="text-gray-600 dark:text-gray-400">No comments fetched</div>}
                 </div>
@@ -205,17 +211,6 @@ export default function Page() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              onClick={async () => {
-                const next = !notifyEnabled
-                setNotifyEnabled(next)
-                if (next) await ensureNotifyPermissionInteractive()
-              }}
-              className={notifyEnabled ? "" : "btn-ghost"}
-            >
-              <Bell size={16} />
-              {notifyEnabled ? "Notify: On" : "Notify: Off"}
-            </Button>
             <Button onClick={() => downloadJSON(rows)} className="btn-ghost"><Download size={16} />JSON</Button>
             <Button onClick={() => downloadCSV(rows)} className="btn-ghost"><Download size={16} />CSV</Button>
             <Button onClick={runScrape} disabled={loading} className="btn-primary">
@@ -334,19 +329,12 @@ export default function Page() {
           </CardContent>
         </Card>
       </main>
-      {mounted && (
-        <div className="fixed bottom-6 right-6 animate-fade-in">
-          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 shadow-lg rounded-full px-4 py-2">
-            <Switch
-              checked={theme === "dark"}
-              onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-            />
-            <span className="text-xs text-gray-600 dark:text-gray-300">
-              {theme === "dark" ? "Dark" : "Light"}
-            </span>
-          </div>
-        </div>
-      )}
+      <FloatingControls
+        notifyEnabled={notifyEnabled}
+        setNotifyEnabled={setNotifyEnabled}
+        setNotifySinceJobId={setNotifySinceJobId}
+        currentJobId={jobId}
+      />
     </div>
   )
 }
