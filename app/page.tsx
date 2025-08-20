@@ -4,12 +4,12 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { FloatingControls } from "@/components/ui/FloatingControls/FloatingControls"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table"
 import { ArrowDownUp, Download, Link2, MessageSquare, Play, Sparkles } from "lucide-react"
+import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import type { ApiSort, Item, SortKey, TimeWindow } from "../app/types/types"
 import { downloadCSV, downloadJSON, valueFor } from "../app/utils/utils"
@@ -34,7 +34,7 @@ export default function Page() {
   const [notifyEnabled, setNotifyEnabled] = useState<boolean>(false)
   const [, setNotifyPermission] = useState<NotificationPermission>("default")
   const [, setMounted] = useState(false)
-  const [notifySinceJobId, setNotifySinceJobId] = useState<number | null>(null)
+  const [notifySinceJobId, ] = useState<number | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -142,6 +142,23 @@ export default function Page() {
     }
   }
 
+  useEffect(() => {
+    // hydrate local toggle
+    try {
+      const saved = localStorage.getItem("notifications-enabled")
+      if (saved != null) setNotifyEnabled(saved === "true")
+    } catch {}
+
+    // live sync if user toggles from the floating control (or another tab)
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "notifications-enabled") {
+        setNotifyEnabled(e.newValue === "true")
+      }
+    }
+    window.addEventListener("storage", onStorage)
+    return () => window.removeEventListener("storage", onStorage)
+  }, [])
+
   function Row({ it }: { it: Item }) {
     const isOpen = !!expanded[it.id]
     return (
@@ -211,6 +228,7 @@ export default function Page() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link href="/history" className="btn btn-ghost">History</Link>
             <Button onClick={() => downloadJSON(rows)} className="btn-ghost"><Download size={16} />JSON</Button>
             <Button onClick={() => downloadCSV(rows)} className="btn-ghost"><Download size={16} />CSV</Button>
             <Button onClick={runScrape} disabled={loading} className="btn-primary">
@@ -329,12 +347,6 @@ export default function Page() {
           </CardContent>
         </Card>
       </main>
-      <FloatingControls
-        notifyEnabled={notifyEnabled}
-        setNotifyEnabled={setNotifyEnabled}
-        setNotifySinceJobId={setNotifySinceJobId}
-        currentJobId={jobId}
-      />
     </div>
   )
 }
